@@ -10,8 +10,8 @@ class MyMLP(object):
     # C: number of classes
     # W[i]: weight matrix in i_th layer
 
-    def __init__(self, hidden_layer_size=(1, ), activation='sigmoid', learning_rate=0.1, A=[], Z=[],
-                 W=[], X=None, Y=None, W_old=None, C=10, N=None, max_iter=100, momentum=0.9):
+    def __init__(self, hidden_layer_size=(1, ), activation='sigmoid', learning_rate=0.1, A=None, Z=None,
+                 W=None, X=None, Y=None, W_old=None, C=None, N=None, max_iter=100, momentum=0.9, loss_info=None):
         self.hidden_layer_size = hidden_layer_size
         self.activation = activation
         self.learning_rate = learning_rate
@@ -25,11 +25,18 @@ class MyMLP(object):
         self.W_old = W_old
         self.max_iter = max_iter
         self.momentum = momentum
+        self.loss_info = loss_info
 
     def add_bias(self, data):
         return np.concatenate((np.ones((1, data.shape[1]))/self.C, data), axis=0)    # bias = first row
 
-    def setup_parameters(self, images, labels):       # todo: fix for batch GD
+    def setup_parameters(self, images, labels):
+        self.A = []
+        self.Z = []
+        self.W = []
+        self.W_old = []
+        self.loss_info = []
+        #print(np.asarray(self.A).shape)
         self.N = images.shape[0]
         self.X = self.add_bias(images.T)           # transpose images and add bias (N x D) --> (N+1 x D)
         self.Y = np.zeros((self.C, self.N))
@@ -59,7 +66,6 @@ class MyMLP(object):
         if self.activation == 'sigmoid':
             return Z / ((1+Z)**2)
         if self.activation == 'relu':
-            #print(Z)
             res = np.ones(Z.shape)
             res[Z <= 0] = 0
             return res
@@ -115,13 +121,17 @@ class MyMLP(object):
 
     def fit(self, images, labels):
         self.setup_parameters(images, labels)
+        self.loss_info = []
         for i in range(self.max_iter):
             #print(self.W[1].shape)
             self.forward_propagation()
             if i % (self.max_iter / 10) == 0:
                 print("Iteration %d: loss = %.4f" % (i, self.loss()))
-
+                self.loss_info.append(self.loss())
             self.back_propagation()
+
+    def get_loss_info(self):
+        return np.asarray(self.loss())
 
     def predict(self, test):
         Z = self.add_bias(test.T)
@@ -134,4 +144,7 @@ class MyMLP(object):
                 Z = self.activate_function(Z)
         return np.argmax(Z, axis=0)
 
-
+    #predict test and check with correct result. Return (the number of correct answer / total) in scale 0...1
+    def predict_score(self, test, correct_result):
+        pred = self.predict(test)
+        return np.mean(pred == correct_result)

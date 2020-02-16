@@ -1,16 +1,11 @@
 import numpy as np
+import Visualization
 
-z = np.ones((5,5))
-z[1][1] = 2
-z[2][4] = 4
-z[0][3] = 5
-print(np.max(z, axis=0, keepdims=True))
-z = np.exp(z - np.max(z, axis=0, keepdims=True))
-print(z / np.sum(z, axis=0))
+a = [1, 2, 3]
+b = [4, 5, 6]
+c = [7, 8, 9]
 
-
-a = [[1,1,1],[-4,5,6],[7,-8,9]]
-a = np.asarray(a)
-
+list_units = np.linspace(20, 100, 5)
+print(list_units)
 
 
