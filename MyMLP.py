@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class MyMLP(object):
     # Z[i] = dot(W[i], X[i])        (inactivated)   (save this for back-propagation calculation)
     # A[i]: sigmoid(Z[i])      (activated)
@@ -72,12 +71,10 @@ class MyMLP(object):
         return TypeError
 
     def softmax(self, Z):
-        #print("dm: ",np.amin(Z), np.amax(Z))
         A = np.exp(Z - np.max(Z, axis=0, keepdims=True))
         return A / np.sum(A, axis=0)
 
     def loss(self):
-        #print("-->", np.amin(self.A[-1]))
         return -np.sum(self.Y * np.log(self.A[-1])) / self.N   # becareful with overflow
 
     def activate_function(self, Z):
@@ -111,7 +108,7 @@ class MyMLP(object):
         self.update_W(L, dWL)
         for l in range(len(self.hidden_layer_size)-1, -1, -1):
             E = np.dot(self.W[l+1], E) * self.derivative_f(self.Z[l])
-            dWl = np.zeros((1, 1))       #todo: ???
+            dWl = np.zeros((1, 1))
             if l == 0:
                 dWl = np.dot(self.X, E.T)
             else:
@@ -123,7 +120,6 @@ class MyMLP(object):
         self.setup_parameters(images, labels)
         self.loss_info = []
         for i in range(self.max_iter):
-            #print(self.W[1].shape)
             self.forward_propagation()
             if i % (self.max_iter / 10) == 0:
                 print("Iteration %d: loss = %.4f" % (i, self.loss()))
@@ -144,7 +140,8 @@ class MyMLP(object):
                 Z = self.activate_function(Z)
         return np.argmax(Z, axis=0)
 
-    #predict test and check with correct result. Return (the number of correct answer / total) in scale 0...1
     def predict_score(self, test, correct_result):
+        # predict test and check with correct result. Return (the number of correct answer / total) in scale 0...1
+
         pred = self.predict(test)
         return np.mean(pred == correct_result)
